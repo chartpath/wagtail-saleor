@@ -1,25 +1,29 @@
 from django.db import models
 from wagtail.wagtailcore.models import Page
-from satchless.item import Item
+from satchless.item import StockedItem
 from wagtail.wagtailadmin.edit_handlers import FieldPanel, InlinePanel
 from wagtail.wagtailcore.fields import RichTextField
 from django_prices.models import PriceField
 from modelcluster.fields import ParentalKey
 
 
-class Variant(models.Model):
+class Variant(StockedItem, models.Model):
     name = models.CharField(max_length=200)
-    description = models.TextField()
+    description = RichTextField()
     price = PriceField(currency='USD', max_digits=5, decimal_places=2)
     size = models.CharField(max_length=3, null=True, blank=True)
     color = models.CharField(max_length=10, null=True, blank=True)
     product = ParentalKey('product.Product', related_name='variants')
+    stock = models.IntegerField('In stock')
 
     def __str__(self):
         return self.name
 
+    def get_stock(self):
+        return self.stock
 
-class Product(Item, Page):
+
+class Product(Page):
     description = RichTextField()
 
     @property
